@@ -56,20 +56,20 @@ exports.ConvertServices = asynHandler(async (req, res, next) => {
         break;
       case 'mail':
       let data = await ConvertApi(url,payload)
-     
+      res.send(data)
 
-      try {
-       let checkMail =  await  SendMail(receiver,message,"Swift",subject,cc,emailresult[0].smtpFrom,swift,url === "pdf"?pdfPath:imgPath,emailresult[0].smtpHost,emailresult[0].smtpPort)
-       console.log('checkMail',checkMail);
-      return res.status(200).json({
-        Status: 1,
-          Message: `Email sent to ${receiver}`,
-        });
-      } catch (err) {
-        console.log(err);
+      // try {
+      //  let checkMail =  await  SendMail(receiver,message,"Swift",subject,cc,emailresult[0].smtpFrom,swift,url === "pdf"?pdfPath:imgPath,emailresult[0].smtpHost,emailresult[0].smtpPort)
+      //  console.log('checkMail',checkMail);
+      // return res.status(200).json({
+      //   Status: 1,
+      //     Message: `Email sent to ${receiver}`,
+      //   });
+      // } catch (err) {
+      //   console.log(err);
     
-        return res.send({Status:0,Message:'Cannot send email'})
-      }
+      //   return res.send({Status:0,Message:'Cannot send email'})
+      // }
     
     
     
