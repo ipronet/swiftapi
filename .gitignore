@@ -1,8 +1,5 @@
 node_modules
-pdfServices/
-imgServices/
-oldswiftapp/
-sesaonline/
 logs/rotate*
 swiftalerts
 rotate*
+package-lock.json
