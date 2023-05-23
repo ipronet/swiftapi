@@ -3,3 +3,6 @@ pdfServices/
 imgServices/
 oldswiftapp/
 sesaonline/
+logs/rotate*
+swiftalerts
+rotate*

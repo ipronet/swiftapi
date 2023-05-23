@@ -2,14 +2,14 @@ const Model = require("../../model/Settings/PathModel");
 const asynHandler = require("../../middleware/async");
 const ErrorResponse = require("../../utls/errorResponse");
 exports.CreatePath = asynHandler(async (req, res, next) => {
-  const { src_swift_docs_path_print, src_swift_docs_path_pdf, src_swift_docs_path_img, src_swift_docs_path_txt} =
+  const { src_swift_main_path, src_swift_docs_path_pdf, src_swift_docs_path_img, src_swift_docs_path_txt} =
     req.body;
 
   /**
    ** Check Duplicate Path
    **/
   const Path = {
-    src_swift_docs_path_print,
+    src_swift_main_path,
     src_swift_docs_path_pdf,
     src_swift_docs_path_img,
     src_swift_docs_path_txt,
@@ -61,10 +61,10 @@ exports.updatePath = asynHandler(async (req, res, next) => {
       Message: `Please provide id`,
     });
   }
-  const { src_swift_docs_path_print, src_swift_docs_path_pdf, src_swift_docs_path_img, src_swift_docs_path_txt} =
+  const {src_swift_main_path, src_swift_docs_path_pdf, src_swift_docs_path_img, src_swift_docs_path_txt} =
   req.body;
   const newData = {
-    src_swift_docs_path_print,
+    src_swift_main_path,
     src_swift_docs_path_pdf,
     src_swift_docs_path_img,
     src_swift_docs_path_txt,

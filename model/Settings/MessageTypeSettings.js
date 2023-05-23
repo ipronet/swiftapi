@@ -1,4 +1,5 @@
 const pool = require("../../config/db");
+const { logger } = require("../../logs/winston");
 
 let swiftdb = {};
 
@@ -6,7 +7,8 @@ swiftdb.all = () => {
   return new Promise((resolve, reject) => {
     pool.query("SELECT * FROM message_type", (err, results) => {
       if (err) {
-        return reject(err);
+        logger.error(err);
+return reject(err);
       }
 
       return resolve(results);
@@ -33,7 +35,8 @@ swiftdb.UpdateMessageType = (postdata, idMsgType) => {
       [postdata, idMsgType],
       (err, results) => {
         if (err) {
-          return reject(err);
+          logger.error(err);
+return reject(err);
         }
         return resolve(results);
       }

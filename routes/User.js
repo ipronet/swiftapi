@@ -27,13 +27,13 @@ const { protect } = require("../middleware/guard");
 
 //routes
 router.route("/create").post(userSignup, CreateUser);
-router.route("/auth").post(userSignIn, AuthUser);
+router.route("/auth").post(AuthUser);
 router.route("/find").post(SingleUser);
 router.route("/fetchme").post(GetAuthUser);
 router.route("/fetchallusers").post(GetAllUsers);
 router.route("/fetchroles").post(GetRoles);
 router.route("/fetchstatus").post(GetStatus);
-router.route("/updateuser").post(userUpdate, updateSystemUser);
+router.route("/updateuser").post(updateSystemUser);
 router.route("/logout").post(SingOut);
 router.route('/remove').post(RemoveUser)
 

@@ -1,12 +1,19 @@
 const USERS = require("../../model/User/UserModel");
+const AD = require("ad");
+
 const LdapModel = require("../../model/Settings/LdapSettings");
 const { list_to_tree,getUniqueListBy } = require("../../helper/func");
 const bcyrpt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const {FilterMenu} = require('../../helper/auth')
+
 const dotenv = require("dotenv");
 const asynHandler = require("../../middleware/async");
 const ErrorResponse = require("../../utls/errorResponse");
+const { PickHistory } = require("../../helper/utilfunc");
 dotenv.config({ path: "./config/config.env" });
+const systemDate = new Date().toISOString().slice(0, 19).replace("T", " ");
+
 exports.AuthUser = asynHandler(async (req, res, next) => {
   const { username, password } = req.body;
   let mailformat =
@@ -19,6 +26,7 @@ exports.AuthUser = asynHandler(async (req, res, next) => {
     console.log("match");
     let checkldap = await LdapModel.FinEnabledLdap();
     if (!checkldap) {
+      PickHistory({ message: "Sorry,No Ldap settings has been configured", function_name: 'AuthUser/FinEnabledLdap', date_started: systemDate,  event: "Authentication", user: username,logtype:0 }, req)
       return res.status(400).json({
         success: false,
         message: `Sorry,No Ldap settings has been configured`,
@@ -28,10 +36,12 @@ exports.AuthUser = asynHandler(async (req, res, next) => {
      * Check if email exist
      *
      */
-
+    
     let verifyEmailInSystem = await USERS.AuthenticateEmail(username);
 
     if (!verifyEmailInSystem) {
+      PickHistory({ message: "Invalid Username or Password", function_name: 'AuthUser/AuthenticateEmail', date_started: systemDate,  event: "Authentication", user: username,logtype:0 }, req)
+
       return next(new ErrorResponse(`Invalid Username or Password`, 401));
     }
     /**
@@ -41,13 +51,47 @@ exports.AuthUser = asynHandler(async (req, res, next) => {
     let maindomain = checkldap.ldap_domain;
     let userDomain = username.split("@").pop();
     if (userDomain !== maindomain) {
+      PickHistory({ message: "Sorry,Domain name does not exist", function_name: 'AuthUser/FinEnabledLdap', date_started: systemDate,  event: "Authentication", user: username,logtype:0 }, req)
+
       return res.status(400).json({
         success: false,
         message: `Sorry,Domain name does not exist`,
       });
     }
-    //Active Directory Function Comes here
-    res.send("Welcome Ldap User...");
+    
+    const ad = new AD({
+      url: `${checkldap.ldap_url}`,
+      user:username,
+      pass: password,
+    });
+    //AUHTENTICATE USER
+
+    let authme = await ad.user(username.split("@")[0]).authenticate(password);
+
+    if (!authme) {
+      PickHistory({ message: "Invalid Username Or Password", function_name: 'AuthUser/authenticate', date_started: systemDate,  event: "Authentication", user: username,logtype:0 }, req)
+
+      return res
+        .status(200)
+        .json({ Status: 0, Message: "Invalid Username Or Password" });
+    }else{
+      let results = await USERS.AuthEmail(username);
+     
+      if (!results) {
+        PickHistory({ message: "Invalid Username Or Password", function_name: 'AuthUser/authenticate', date_started: systemDate,  event: "Authentication", user: username,logtype:0 }, req)
+
+        return next(new ErrorResponse(`Invalid Username or Password`, 401));
+      }
+      let getUserinfo = await FilterMenu(results)
+
+      //Active Directory Function Comes here
+      PickHistory({ message: "Logged in successfully", function_name: 'AuthUser/authenticate', date_started: systemDate,  event: "Authentication", user: username,logtype:1 }, req)
+
+      res
+      .status(200)
+      .json({ Status: 1, Message: "Logged in successfully",Data:getUserinfo });
+      //log here by dropping it in rabbit mq
+    }
   } else {
     /**
      * Local authentication
@@ -61,6 +105,7 @@ exports.AuthUser = asynHandler(async (req, res, next) => {
     let results = await USERS.Authenticate(username);
 
     if (!results) {
+      PickHistory({ message: "Invalid Username or Password", function_name: 'AuthUser/Authenticate', date_started: systemDate,  event: "Authentication", user: username,logtype:0 }, req)
       return next(new ErrorResponse(`Invalid Username or Password`, 401));
     }
 
@@ -70,6 +115,7 @@ exports.AuthUser = asynHandler(async (req, res, next) => {
 
     const isMatch = await bcyrpt.compare(password, results.password);
     if (!isMatch) {
+      PickHistory({ message: "Invalid Username or Password", function_name: 'AuthUser/Authenticate', date_started: systemDate,  event: "Authentication", user: username,logtype:0 }, req)
       return next(new ErrorResponse(`Invalid Username or Password`, 401));
     }
     delete results.password
@@ -86,70 +132,12 @@ exports.AuthUser = asynHandler(async (req, res, next) => {
     // let token_name = dbtoken.token_name;
 
       //Get User role
-
-  let roleResult = await USERS.FindRole(results.roleid);
-  if (!roleResult) {
-    return res.status(200).json({
-      Status: 0,
-      Data: [],
-      Message: `Sorry, No Role has been assigned to this account`,
-    });
-  }
-
-  //Get Role Menu List
-
-  let roleMenuList = await USERS.FindRoleMenu(results.roleid);
-  if (!roleMenuList) {
-    return res.status(200).json({
-      Status: 0,
-      Data: [],
-      Message: `Sorry, No Menus has been assigned to your role`,
-    });
-  }
-
-  //Get User Menu
-
-  let deniedResult = await USERS.FindUserMenu(results.id, 0);
-  let allowedResult = await USERS.FindUserMenu(results.id, 1);
-
-  let packMenu = [];
-
-  for (const iterator of roleMenuList) {
-    let newRoleMenu = {
-      menu: iterator.menuid,
-    };
-
-    packMenu.push(newRoleMenu);
-  }
-
-  packMenu = packMenu.filter(
-    (ar) => !deniedResult.find((rm) => rm.menu === ar.menu)
-  );
-  packMenu.push(...allowedResult);
-
-  let NavItem = [];
-
-let parser = JSON.stringify(packMenu)
-let newparser = JSON.parse(parser)
-
-//remove duplicates
-const noDuplicates = getUniqueListBy(newparser, 'menu')
-  for (const iterator of noDuplicates) {
-
-
-    let menus = await USERS.FindMenu(iterator.menu);
-    NavItem.push(menus);
-  }
-   let listing = list_to_tree(NavItem);
-
-   let userData = {
-    userInfo :results,
-    menus : listing
-   }
+      let getUserinfo = await FilterMenu(results)
+      PickHistory({ message: "Logged in successfully", function_name: 'AuthUser/authenticate', date_started: systemDate,  event: "Authentication", user: username,logtype:1 }, req)
 
     res
     .status(200)
-    .json({ Status: 1, Message: "Logged in successfully",Data:userData });
+    .json({ Status: 1, Message: "Logged in successfully",Data:getUserinfo });
 
     // sendTokenResponse(
     //   username,

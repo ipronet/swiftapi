@@ -60,6 +60,7 @@ exports.CreateCompany = asynHandler(async (req, res, next) => {
 });
 
 exports.GetCompany = asynHandler(async (req, res, next) => {
+  console.log(req.headers);
   let results = await CompanyModel.all();
   if (results.length == 0) {
     return res.status(401).json({
@@ -73,23 +74,24 @@ exports.GetCompany = asynHandler(async (req, res, next) => {
 exports.updateCompany = asynHandler(async (req, res, next) => {
   let id = req.body.id;
 
+
   //check files for
-  const file = req.files.comp_logo;
-  if (!file.mimetype.startsWith("image")) {
-    return next(new ErrorResponse(`Please upload an image file`, 400));
-  }
+  // const file = req.files.comp_logo;
+  // if (!file.mimetype.startsWith("image")) {
+  //   return next(new ErrorResponse(`Please upload an image file`, 400));
+  // }
 
   //change filename
-  file.name = `comp_logo${path.parse(file.name).ext}`;
-  file.mv(`./uploads/${file.name}`, async (err) => {
-    if (err) {
-      console.log(err);
-      return next(new ErrorResponse(`Problem with file upload`, 400));
-    }
-  });
+  // file.name = `comp_logo${path.parse(file.name).ext}`;
+  // file.mv(`./uploads/${file.name}`, async (err) => {
+  //   if (err) {
+  //     console.log(err);
+  //     return next(new ErrorResponse(`Problem with file upload`, 400));
+  //   }
+  // });
   const newData = {
     comp_name: req.body.comp_name,
-    comp_logo: req.body.comp_logo,
+    // comp_logo: file.name,
     comp_slogan: req.body.comp_slogan,
     comp_email: req.body.comp_email,
     comp_url: req.body.comp_url,

@@ -5,7 +5,6 @@ const ErrorResponse = require("../../utls/errorResponse");
 exports.CreateCompany = asynHandler(async (req, res, next) => {
   const { comp_name, comp_logo, comp_slogan, comp_email, comp_url, address } =
     req.body;
-  console.log(req.files);
   //check files for
   if (req.files === null) {
     return next(new ErrorResponse(`Please include a  file`, 400));
@@ -60,6 +59,7 @@ exports.CreateCompany = asynHandler(async (req, res, next) => {
 });
 
 exports.GetCompany = asynHandler(async (req, res, next) => {
+  console.log(req.headers);
   let results = await CompanyModel.all();
   if (results.length == 0) {
     return res.status(401).json({

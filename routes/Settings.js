@@ -57,6 +57,16 @@ DownloadConverters,
 FileReadController
   } = require("../controllers/Converter/convert");
 
+  //Session
+const {
+GetSystemSession,
+updateSystemSession
+    } = require("../controllers/Settings/session");
+
+    const {
+ Utility
+          } = require("../controllers/Dashboard/dashboard");
+
 //schema
 const {
   emailSettings,
@@ -72,7 +82,7 @@ const {
 } = require("../middleware/user.schema");
 
 // protect middleware
-const { protect, authorisRole,authToken } = require("../middleware/guard");
+const { protect, authorisRole,authToken, protectMsgDownloadAccess, protectMsgReadAccess, protectMsgConvertAccess } = require("../middleware/guard");
 const { updateldap } = require("../validation/swiftuser.schema");
 
 //routes
@@ -95,11 +105,11 @@ router.route("/updateldap").post(updateldapConfig, updateLdapSettings);
 router.route("/getldap").post(GetLdap);
 
 //alertprofile
-router.route("/createprofile").post(AlertProfile, CreateProfile);
+router.route("/createprofile").post(CreateProfile);
 router.route("/allprofile").post(GetProfiles);
 router.route("/singleprofile").post(SingleProfile);
 router.route("/removeprofile").post(RemoveProfile);
-router.route("/updateprofile").post(AlertProfile, updateProfile);
+router.route("/updateprofile").post(updateProfile);
 
 //path settings
 router.route("/createpath").post(Path, CreatePath);
@@ -116,9 +126,19 @@ router.route("/allactivegateway").post(ActiveGateway);
 router.route("/findsmsgateway").post(SingleGateway);
 router.route("/removesmsgateway").post(RemoveSmsGateway);
 
-//convert services routes
+//convert services routes 
+
+
+// router.route("/convert").post(protectMsgConvertAccess,ConvertServices);
+//  router.route("/download").post(protectMsgDownloadAccess,DownloadConverters);
+// router.route("/read").post(protectMsgReadAccess,FileReadController);
 router.route("/convert").post(ConvertServices);
 router.route("/download").post(DownloadConverters);
 router.route("/read").post(FileReadController);
 
+//session settings routes
+router.route("/getsession").post(GetSystemSession);
+router.route("/updatesession").post(updateSystemSession);
+
+router.route("/utility").post(Utility);
 module.exports = router;

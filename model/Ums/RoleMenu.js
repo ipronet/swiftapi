@@ -1,4 +1,5 @@
 const pool = require("../../config/db");
+const { logger } = require("../../logs/winston");
 
 let swiftdb = {};
 
@@ -7,7 +8,8 @@ swiftdb.all = () => {
     const sql = "SELECT DISTINCT * FROM rolemenu WHERE status = 1 AND deletedAt IS NULL GROUP BY roleid";
     pool.query(sql, function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results);
     });
@@ -16,10 +18,11 @@ swiftdb.all = () => {
 
 swiftdb.allshow = () => {
   return new Promise((resolve, reject) => {
-    const sql = "SELECT DISTINCT * FROM rolemenu WHERE deletedAt IS NULL GROUP BY roleid";
+    const sql = "SELECT roleid FROM rolemenu group by roleid";
     pool.query(sql, function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results);
     });
@@ -31,7 +34,8 @@ swiftdb.rolemenusnodistinct = (roleid) => {
       const sql = "SELECT m.menuid,c.title FROM rolemenu m INNER JOIN menu c ON c.id = m.menuid WHERE m.status = 1 AND m.deletedAt IS NULL AND m.roleid = ?";
       pool.query(sql,[roleid], function (error, results, fields) {
         if (error) {
-          return reject(error);
+      logger.error(err);
+return reject(err);
         }
         return resolve(results);
       });
@@ -43,7 +47,8 @@ swiftdb.rolemenusnodistinct = (roleid) => {
       const sql = "SELECT m.id AS rolemenuid,m.status AS rolemenustatus, m.menuid,c.title FROM rolemenu m INNER JOIN menu c ON c.id = m.menuid WHERE  m.deletedAt IS NULL AND m.roleid = ?";
       pool.query(sql,[roleid], function (error, results, fields) {
         if (error) {
-          return reject(error);
+      logger.error(err);
+return reject(err);
         }
         return resolve(results);
       });
@@ -68,7 +73,8 @@ swiftdb.update = (postdata, id) => {
       [postdata, id],
       (err, results) => {
         if (err) {
-          return reject(err);
+          logger.error(err);
+return reject(err);
         }
         return resolve(results);
       }
@@ -82,7 +88,8 @@ swiftdb.FindRoleID = (id) => {
         "SELECT * FROM rolemenu WHERE id = ?";
       pool.query(sql, [id], function (error, results, fields) {
         if (error) {
-          return reject(error);
+      logger.error(err);
+return reject(err);
         }
         return resolve(results[0]);
       });
@@ -95,7 +102,8 @@ swiftdb.FindRoleID = (id) => {
         "SELECT * FROM rolemenu WHERE roleid = ?";
       pool.query(sql, [id], function (error, results, fields) {
         if (error) {
-          return reject(error);
+      logger.error(err);
+return reject(err);
         }
         return resolve(results[0]);
       });
@@ -108,7 +116,8 @@ swiftdb.FindRoleID = (id) => {
         "SELECT * FROM rolemenu WHERE roleid = ? AND menuid  = ?";
       pool.query(sql, [roleid, menuid], function (error, results, fields) {
         if (error) {
-          return reject(error);
+      logger.error(err);
+return reject(err);
         }
         return resolve(results[0]);
       });
@@ -120,7 +129,8 @@ swiftdb.FindUserMenu = (user, access) => {
       "SELECT DISTINCT menuid AS menu FROM usermenu WHERE userID = ? AND status  = ? AND accessType = ?  AND deletedAt IS NULL";
     pool.query(sql, [user, "1", access], function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results);
     });
@@ -133,7 +143,8 @@ swiftdb.FindMenu = (id) => {
       "SELECT * FROM menu WHERE id = ? AND status  = ?  AND deletedAt IS NULL";
     pool.query(sql, [id, "1"], function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results[0]);
     });
@@ -145,7 +156,8 @@ swiftdb.FindRoutes = () => {
     const sql = "SELECT * FROM routes";
     pool.query(sql, function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results[0]);
     });

@@ -16,7 +16,6 @@ exports.SetupRoleMenu = asynHandler(async (req, res, next) => {
   //find rolemenu
   let role = await Model.FindRoleMenu(roleid, menuid);
 
-  console.log(role);
 
   if (role && role.deletedAt === null) {
     return res.status(200).json({
@@ -60,6 +59,7 @@ exports.SetupRoleMenu = asynHandler(async (req, res, next) => {
 exports.AllRoleMenu = asynHandler(async (req, res, next) => {
 
   let dbresult = await Model.allshow();
+  console.log(dbresult);
   if (dbresult.length == 0) {
     return res.status(200).json({
       Status: 0,
@@ -68,7 +68,6 @@ exports.AllRoleMenu = asynHandler(async (req, res, next) => {
     });
   }
 
-  console.log(dbresult);
   let bigData = [];
   for (const iterator of dbresult) {
     let getrole = await RoleModel.FindRoleID(iterator.roleid);

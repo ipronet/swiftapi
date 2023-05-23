@@ -1,3 +1,4 @@
+const { logger } = require("../../logs/winston");
 const pool = require("../config/db");
 
 let swiftdb = {};
@@ -6,7 +7,8 @@ swiftdb.all = () => {
   return new Promise((resolve, reject) => {
     pool.query("SELECT * FROM settings_authentication", (err, results) => {
       if (err) {
-        return reject(err);
+        logger.error(err);
+return reject(err);
       }
 
       return resolve(results);
@@ -37,7 +39,8 @@ swiftdb.UpdateAuthenticationSettings = (email) => {
       [email],
       (err, results) => {
         if (err) {
-          return reject(err);
+          logger.error(err);
+return reject(err);
         }
         return resolve(results);
       }

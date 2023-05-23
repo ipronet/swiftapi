@@ -1,4 +1,5 @@
 const pool = require("../../config/db");
+const { logger } = require("../../logs/winston");
 
 let swiftdb = {};
 
@@ -8,7 +9,8 @@ swiftdb.all = () => {
       "SELECT DISTINCT * FROM usermenu WHERE status = 1 AND deletedAt IS NULL GROUP BY userid";
     pool.query(sql, function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results);
     });
@@ -20,7 +22,8 @@ swiftdb.FindUsers = () => {
     const sql = "SELECT  * FROM users WHERE status = 1 AND deletedAt IS NULL";
     pool.query(sql, function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results);
     });
@@ -33,7 +36,8 @@ swiftdb.FindUser = (username) => {
       const sql = "SELECT  * FROM users WHERE username = ?";
       pool.query(sql,[username], function (error, results, fields) {
         if (error) {
-          return reject(error);
+      logger.error(err);
+return reject(err);
         }
         return resolve(results[0]);
       });
@@ -46,7 +50,8 @@ swiftdb.rolemenusnodistinct = (roleid) => {
       "SELECT m.menuid,c.title FROM usermenu m INNER JOIN menu c ON c.id = m.menuid WHERE m.status = 1 AND m.deletedAt IS NULL AND m.userid = ?";
     pool.query(sql, [roleid], function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results);
     });
@@ -59,7 +64,8 @@ swiftdb.rolemenusnodistinctshowall = (roleid) => {
       "SELECT m.id AS usermenuid,m.accessType,m.status as usermenustatus,  m.menuid,c.title FROM usermenu m INNER JOIN menu c ON c.id = m.menuid WHERE m.userid = ? AND m.deletedAt IS NULL";
     pool.query(sql, [roleid], function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results);
     });
@@ -84,7 +90,8 @@ swiftdb.update = (postdata, id) => {
       [postdata, id],
       (err, results) => {
         if (err) {
-          return reject(err);
+          logger.error(err);
+return reject(err);
         }
         return resolve(results);
       }
@@ -97,7 +104,8 @@ swiftdb.Find = (id) => {
     const sql = "SELECT * FROM usermenu WHERE id = ?";
     pool.query(sql, [id], function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results[0]);
     });
@@ -110,7 +118,8 @@ swiftdb.FindUserMenu = (userID,menuid) => {
         "SELECT * FROM usermenu WHERE userID = ? AND menuid  = ?";
       pool.query(sql, [userID, menuid], function (error, results, fields) {
         if (error) {
-          return reject(error);
+      logger.error(err);
+return reject(err);
         }
         return resolve(results[0]);
       });

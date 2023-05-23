@@ -1,12 +1,14 @@
 const pool = require("../../config/db");
+const { logger } = require("../../logs/winston");
 
 let swiftdb = {};
 
 swiftdb.all = () => {
   return new Promise((resolve, reject) => {
-    pool.query("SELECT * FROM alert_profile WHERE deletedAt IS NULL AND status = 1", (err, results) => {
+    pool.query("SELECT * FROM alert_profile WHERE deletedAt IS NULL", (err, results) => {
       if (err) {
-        return reject(err);
+logger.error(err);
+return reject(err);
       }
 
       return resolve(results);
@@ -21,7 +23,8 @@ swiftdb.create = (postData = req.body) => {
       [postData],
       (err, results) => {
         if (err) {
-          return reject(err);
+  logger.error(err);
+return reject(err);
         }
 
         return resolve(results);
@@ -30,14 +33,15 @@ swiftdb.create = (postData = req.body) => {
   });
 };
 
-swiftdb.update = (postdata, idprofile) => {
+swiftdb.update = (postdata, id) => {
   return new Promise((resolve, reject) => {
     pool.query(
-      "UPDATE alert_profile SET ? WHERE idprofile = ?",
-      [postdata, idprofile],
+      "UPDATE alert_profile SET ? WHERE id = ?",
+      [postdata, id],
       (err, results) => {
         if (err) {
-          return reject(err);
+  logger.error(err);
+return reject(err);
         }
         return resolve(results);
       }
@@ -47,10 +51,11 @@ swiftdb.update = (postdata, idprofile) => {
 
 swiftdb.find = (id) => {
   return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM alert_profile WHERE deletedAt IS NULL AND status = 1 AND email = ?";
+    const sql = "SELECT * FROM alert_profile WHERE deletedAt IS NULL AND id = ?";
     pool.query(sql, [id], function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results[0]);
     });

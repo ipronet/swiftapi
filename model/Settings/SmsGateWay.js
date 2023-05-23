@@ -1,4 +1,5 @@
 const pool = require("../../config/db");
+const { logger } = require("../../logs/winston");
 
 let swiftdb = {};
 
@@ -8,7 +9,8 @@ swiftdb.all = () => {
       "SELECT * FROM smsgateway WHERE deletedAt IS NULL",
       (err, results) => {
         if (err) {
-          return reject(err);
+          logger.error(err);
+return reject(err);
         }
 
         return resolve(results);
@@ -23,7 +25,8 @@ swiftdb.allActive = () => {
         "SELECT * FROM smsgateway WHERE deletedAt IS NULL AND status = 1",
         (err, results) => {
           if (err) {
-            return reject(err);
+            logger.error(err);
+return reject(err);
           }
   
           return resolve(results);
@@ -36,7 +39,8 @@ swiftdb.create = (postData = req.body) => {
   return new Promise((resolve, reject) => {
     pool.query("INSERT INTO smsgateway SET ?", [postData], (err, results) => {
       if (err) {
-        return reject(err);
+        logger.error(err);
+return reject(err);
       }
 
       return resolve(results);
@@ -51,7 +55,8 @@ swiftdb.update = (postdata, id) => {
       [postdata, id],
       (err, results) => {
         if (err) {
-          return reject(err);
+          logger.error(err);
+return reject(err);
         }
         return resolve(results);
       }
@@ -63,7 +68,8 @@ swiftdb.updateAll = () => {
   return new Promise((resolve, reject) => {
     pool.query("UPDATE smsgateway SET status = 0", (err, results) => {
       if (err) {
-        return reject(err);
+        logger.error(err);
+return reject(err);
       }
       return resolve(results);
     });
@@ -76,7 +82,8 @@ swiftdb.find = (id) => {
       "SELECT * FROM smsgateway WHERE deletedAt IS NULL AND status = 1";
     pool.query(sql, [id], function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results[0]);
     });

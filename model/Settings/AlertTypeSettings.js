@@ -1,4 +1,5 @@
 const pool = require("../../config/db");
+const { logger } = require("../../logs/winston");
 
 let swiftdb = {};
 
@@ -6,7 +7,8 @@ swiftdb.all = () => {
   return new Promise((resolve, reject) => {
     pool.query("SELECT * FROM alert_type", (err, results) => {
       if (err) {
-        return reject(err);
+logger.error(err);
+return reject(err);
       }
 
       return resolve(results);
@@ -37,7 +39,8 @@ swiftdb.UpdatealertType = (postdata, idalert_type) => {
       [postdata, idalert_type],
       (err, results) => {
         if (err) {
-          return reject(err);
+  logger.error(err);
+return reject(err);
         }
         return resolve(results);
       }

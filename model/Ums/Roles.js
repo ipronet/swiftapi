@@ -1,4 +1,5 @@
 const pool = require("../../config/db");
+const { logger } = require("../../logs/winston");
 
 let swiftdb = {};
 
@@ -7,7 +8,8 @@ swiftdb.all = () => {
     const sql = "SELECT * FROM role WHERE status = 1 AND deletedAt IS NULL";
     pool.query(sql, function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results);
     });
@@ -19,7 +21,8 @@ swiftdb.allshow = () => {
     const sql = "SELECT * FROM role";
     pool.query(sql, function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results);
     });
@@ -44,7 +47,8 @@ swiftdb.update = (postdata, id) => {
       [postdata, id],
       (err, results) => {
         if (err) {
-          return reject(err);
+          logger.error(err);
+return reject(err);
         }
         return resolve(results);
       }
@@ -57,7 +61,8 @@ swiftdb.FindRole = (name) => {
       "SELECT * FROM role WHERE title = ?";
     pool.query(sql, [name], function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results[0]);
     });
@@ -69,7 +74,8 @@ swiftdb.FindRoleID = (id) => {
         "SELECT * FROM role WHERE id = ?";
       pool.query(sql, [id], function (error, results, fields) {
         if (error) {
-          return reject(error);
+      logger.error(err);
+return reject(err);
         }
         return resolve(results[0]);
       });
@@ -82,7 +88,8 @@ swiftdb.FindRoleMenu = (id) => {
       "SELECT * FROM rolemenu WHERE roleid = ? AND status  = ? AND deletedAt IS NULL";
     pool.query(sql, [id, "1"], function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results);
     });
@@ -95,7 +102,8 @@ swiftdb.FindUserMenu = (user, access) => {
       "SELECT DISTINCT menuid AS menu FROM usermenu WHERE userID = ? AND status  = ? AND accessType = ?  AND deletedAt IS NULL";
     pool.query(sql, [user, "1", access], function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results);
     });
@@ -108,7 +116,8 @@ swiftdb.FindMenu = (id) => {
       "SELECT * FROM menu WHERE id = ? AND status  = ?  AND deletedAt IS NULL";
     pool.query(sql, [id, "1"], function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results[0]);
     });
@@ -120,7 +129,8 @@ swiftdb.FindRoutes = () => {
     const sql = "SELECT * FROM routes";
     pool.query(sql, function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results[0]);
     });

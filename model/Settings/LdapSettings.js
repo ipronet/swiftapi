@@ -1,4 +1,5 @@
 const pool = require("../../config/db");
+const { logger } = require("../../logs/winston");
 
 let swiftdb = {};
 
@@ -6,7 +7,8 @@ swiftdb.all = () => {
   return new Promise((resolve, reject) => {
     pool.query("SELECT * FROM settings_auth_ldap", (err, results) => {
       if (err) {
-        return reject(err);
+        logger.error(err);
+return reject(err);
       }
       return resolve(results);
     });
@@ -35,7 +37,8 @@ swiftdb.FindDomain = (ldap_domain) => {
       "SELECT ldap_domain FROM settings_auth_ldap WHERE ldap_domain = ?";
     pool.query(sql, [ldap_domain], function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results[0]);
     });
@@ -47,7 +50,8 @@ swiftdb.FinEnabledLdap = () => {
     const sql = "SELECT * FROM settings_auth_ldap WHERE enabled = 1";
     pool.query(sql, function (error, results, fields) {
       if (error) {
-        return reject(error);
+    logger.error(err);
+return reject(err);
       }
       return resolve(results[0]);
     });
@@ -61,7 +65,8 @@ swiftdb.UpdateLdap = (postdata, idsettings_auth_LDAP) => {
       [postdata, idsettings_auth_LDAP],
       (err, results) => {
         if (err) {
-          return reject(err);
+          logger.error(err);
+return reject(err);
         }
         return resolve(results);
       }

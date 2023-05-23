@@ -4,11 +4,13 @@ const morgan = require("morgan");
 const fileupload = require("express-fileupload");
 const cookieParser = require("cookie-parser");
 const errorHandler = require("./middleware/error");
+const path = require("path")
 
 const users = require("./routes/User");
 const settings = require("./routes/Settings");
 const msg = require("./routes/Messages");
 const ums = require("./routes/Ums");
+const { logger, morganMiddleware } = require("./logs/winston");
 
 //load env vars
 dotenv.config({ path: "./config/config.env" });
@@ -23,8 +25,11 @@ app.use(fileupload());
 app.use(cookieParser());
 
 if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
+  app.use(morganMiddleware);
 }
+var __dirname = path.resolve()
+app.use('/uploads', express.static(path.join(__dirname, '/uploads')))
+
 //Mount routes
 app.use("/swiftapp/v1/users", users);
 app.use("/swiftapp/v1/settings", settings);
@@ -55,6 +60,8 @@ app.listen(PORT, () => {
   console.log(
     `Swift App: Running in ${process.env.NODE_ENV} mode and listening on port http://:${PORT}`
   );
+  logger.debug(`Swift App: Running in ${process.env.NODE_ENV} mode and listening on port http://:${PORT}`);
+
 });
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (err, promise) => {
