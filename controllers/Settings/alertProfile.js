@@ -16,7 +16,9 @@ exports.CreateProfile = asynHandler(async (req, res, next) => {
       internal_alert_email: req.body.internal_alert_email,
       idalert_type:req.body.idalert_type,
       status :req.body.status ,
-      currencytype:req.body.currencytype
+      currencytype:req.body.currencytype,
+      Recipient:req.body.Recipient,
+      Subject:req.body.Subject,
     };
   
     let result = await Swift.create(profileData);
