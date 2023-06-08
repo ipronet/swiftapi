@@ -51,6 +51,7 @@ exports.AuthUser = asynHandler(async (req, res, next) => {
     let maindomain = checkldap.ldap_domain;
     let userDomain = username.split("@").pop();
     if (userDomain !== maindomain) {
+      
       PickHistory({ message: "Sorry,Domain name does not exist", function_name: 'AuthUser/FinEnabledLdap', date_started: systemDate,  event: "Authentication", user: username,logtype:0 }, req)
 
       return res.status(400).json({
@@ -70,10 +71,10 @@ exports.AuthUser = asynHandler(async (req, res, next) => {
 
     if (!authme) {
       PickHistory({ message: "Invalid Username Or Password", function_name: 'AuthUser/authenticate', date_started: systemDate,  event: "Authentication", user: username,logtype:0 }, req)
-
+      
       return res
-        .status(200)
-        .json({ Status: 0, Message: "Invalid Username Or Password" });
+        .status(401)
+        .json({ Status: 0, Message: "Invalid Credentials or Check Account Lock Status" });
     }else{
       let results = await USERS.AuthEmail(username);
      

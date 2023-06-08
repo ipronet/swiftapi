@@ -2,6 +2,7 @@ const Swift = require("../../model/Settings/AlertProfileSettings");
 const asynHandler = require("../../middleware/async");
 const ErrorResponse = require("../../utls/errorResponse");
 const { PickHistory } = require("../../helper/utilfunc");
+const { Consume, Produce } = require("../../job/consume");
 const systemDate = new Date().toISOString().slice(0, 19).replace("T", " ");
 
 exports.CreateProfile = asynHandler(async (req, res, next) => {
@@ -23,6 +24,11 @@ exports.CreateProfile = asynHandler(async (req, res, next) => {
   
     let result = await Swift.create(profileData);
     if (result.affectedRows === 1) {
+      let quemsg = {
+        ops:"add",
+        data:profileData
+      }
+      Produce(quemsg,'SwiftMessageAlerts')
       PickHistory({ message: `Record Created Successfully`, function_name: 'CreateProfile', date_started: systemDate,  event: "Create Alert Profile",logtype:1 }, req)
 
      return  res.status(200).json({
@@ -80,11 +86,11 @@ exports.SingleProfile = asynHandler(async (req, res, next) => {
   });
 
 exports.updateProfile = asynHandler(async (req, res, next) => {
-  console.log(req.body);
   const  updatedAt =  new Date().toISOString().slice(0, 19).replace("T", " ")
   let payload = req.body
   payload.updatedAt = updatedAt
   let id = req.body.id;
+
   if (!id) {
     PickHistory({ message: `No id provided in the request body`, function_name: 'updateProfile', date_started: systemDate,  event: "Update alert profile record",logtype:0 }, req)
     return res.status(400).json({
@@ -94,8 +100,14 @@ exports.updateProfile = asynHandler(async (req, res, next) => {
   }
 
   let result = await Swift.update(payload, id);
+  let quemsg = {
+    ops:"update",
+    data:payload
+  }
 
   if (result.affectedRows === 1) {
+    Produce(quemsg,'SwiftMessageAlerts')
+
     PickHistory({ message: `Profile with ${id} record has been updated from db`, function_name: 'updateProfile', date_started: systemDate,  event: "Update Alert Profile",logtype:1 }, req)
 
     return res.status(200).json({

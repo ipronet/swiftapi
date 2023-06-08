@@ -1,12 +1,13 @@
 const asynHandler = require("../../middleware/async");
 const { MonitorUrl } = require("../../helper/scanners");
-const {pdfUrl,imgUrl} =  require("../../helper/vars")
+const {pdfUrl,imgUrl,reportUrl} =  require("../../helper/vars")
 const {formatBytes} =  require("../../helper/func")
 const Model = require("../../model/Messages/Mtype");
 const systemDate = new Date().toISOString().slice(0, 19).replace("T", " ");
 
 const os = require("os");
 const { PickHistory } = require("../../helper/utilfunc");
+const { ConvertApi } = require("../../helper/apiCall");
 exports.Utility = asynHandler(async (req, res, next) => {
     
     let pdfcheck = await MonitorUrl(pdfUrl);
@@ -112,4 +113,11 @@ exports.Utility = asynHandler(async (req, res, next) => {
         Message: `Loading Utility`,
         Data:mainUtility
       })
+});
+exports.UtilityReport = asynHandler(async (req, res, next) => {
+    
+    let report = await ConvertApi(reportUrl)
+    PickHistory({ message: `Viewed dashboard data`, function_name: 'Utility', date_started: systemDate,  event: "View dashboard report utility",logtype:1 }, req)
+    res.send(report)
+
 });

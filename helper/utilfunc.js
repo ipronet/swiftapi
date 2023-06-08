@@ -15,7 +15,7 @@ module.exports = {
         data.url = req.path
         data.user = req.headers.user
 
-        console.log(data);
+        // console.log(data);
     //    ApiCall(`${process.env.AuditUrl}api/v1/savelogs`, 'POST', ``, data)
 
     },

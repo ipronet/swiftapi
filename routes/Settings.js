@@ -64,7 +64,8 @@ updateSystemSession
     } = require("../controllers/Settings/session");
 
     const {
- Utility
+ Utility,
+ UtilityReport
           } = require("../controllers/Dashboard/dashboard");
 
 //schema
@@ -141,4 +142,5 @@ router.route("/getsession").post(GetSystemSession);
 router.route("/updatesession").post(updateSystemSession);
 
 router.route("/utility").post(Utility);
+router.route("/utilityreport").post(UtilityReport);
 module.exports = router;
