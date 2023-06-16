@@ -57,10 +57,74 @@ exports.ConvertServices = asynHandler(async (req, res, next) => {
 
   switch (transport) {
     case '':
-      let notransport = await ConvertApi(url, payload) //9000 ,pdf convert api
+
+    /****************************** Modification Here **********************************************************/
+             let serviceURL = 'http://localhost:9091/getdoc/' + swift + '/template01/' + services
+             const axios = require('axios');
+             const fs = require('fs');
+             let myData; // Initialize an empty object
+
+             //console.log(swift)
+            //{ docname: 'MT103-FT23151CD2KG', fileFormat: 'any' }
+
+             let file_name_enquiry = axios.get(serviceURL)
+                      .then(response => {
+                          //const data = response.data;
+                          const contentDisposition = response.headers['content-disposition'];
+                          const regex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                          const matches = regex.exec(contentDisposition);
+                          let filename = '';
+                          let downloadpath = '';
+
+                          if (matches != null && matches[1]) {
+                            filename = matches[1].replace(/['"]/g, '');
+                          }
+                          const data = { docname: filename, fileFormat: services };
+
+                          if (filename.includes('zip')) {
+                            data["fileFormat"] = "zip"
+                          }
+
+                          switch(true){
+
+                            case filename.includes('zip'):
+                              console.log("goes to zip folder")
+                              downloadpath = dbresult.src_swift_docs_path_zip
+                              break;
+                            case filename.includes('pdf'):
+                              console.log("goes to pdf folder")
+                              downloadpath = dbresult.src_swift_docs_path_pdf
+                              break;        
+                            case filename.includes('jpg'):
+                               console.log("goes to img folder")
+                               downloadpath = dbresult.src_swift_docs_path_img
+                               break;
+                            default:
+                              console.log("goes to undefined folder")
+                          }
+
+
+                          fs.writeFileSync(downloadpath + "/" + filename , response.data);
+                          console.log("Attachment Name ==> ",filename)                         
+                          console.log("Recieved Data ===== ",data)
+                          res.send(data)
+                      })
+                      .catch(error => {
+                        console.error('Error retrieving data:', error);
+                      });
+
+            //console.log("File Name Detail . . . ",file_name_enquiry);
+
+    /****************************** Modification Ends Here **********************************************************/
+
+      //let notransport = await ConvertApi(url, payload) //9000 ,pdf convert api
       PickHistory({ message: `Message with name ${swift} has been converted successfully using ${services} services and converted to ${format} file format `, function_name: 'ConvertServices', date_started: systemDate,  event: `Convert ${swift} to ${format} file format`,logtype:0 }, req)
 
-      res.send(notransport)
+      //console.log("Payload=============================================",payload);
+      //console.log("NoTransport=============================================",notransport);
+
+      //res.send(notransport)
+      console.log("File Name Sent . . . !")
       break;
     case 'mail':
       console.log('im here');
@@ -93,6 +157,7 @@ exports.DownloadConverters = asynHandler(async (req, res, next) => {
   let dbresult = await Model.all();
 
   /** -------------------------------------  Albert -- BEGIN Modification ---------------------------- */
+  //console.log(dbresult)
   console.log("SWFIT ---" + swift)
   console.log("SERVICES --- " + services)
   console.log("PATH ---" + dbresult.src_swift_docs_path_pdf)
@@ -101,7 +166,7 @@ exports.DownloadConverters = asynHandler(async (req, res, next) => {
   const crypto = require('crypto');
 
   let uniquefile = crypto.randomBytes(16).toString('hex');
-  console.log(uniquefile)
+  console.log("",uniquefile)
   let serviceURL = 'http://localhost:9091/getdoc/' + swift + '/template01/' + services
 
   
@@ -109,10 +174,43 @@ exports.DownloadConverters = asynHandler(async (req, res, next) => {
   // Send a GET request to the server
   axios.get(serviceURL, { responseType: 'arraybuffer' })
     .then(response => {
+      //console.log("Response From Service ====> ", response)
+      const contentDisposition = response.headers['content-disposition'];
+      const regex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+      const matches = regex.exec(contentDisposition);
+      let filename = '';
+
+      if (matches != null && matches[1]) {
+        filename = matches[1].replace(/['"]/g, '');
+      }
+
+      let downloadpath = ""
+  
+      switch(true){
+
+        case filename.includes('zip'):
+          console.log("goes to zip folder")
+          downloadpath = dbresult.src_swift_docs_path_zip
+          break;
+        case filename.includes('pdf'):
+          console.log("goes to pdf folder")
+          downloadpath = dbresult.src_swift_docs_path_pdf
+          break;        
+        case filename.includes('jpg'):
+           console.log("goes to img folder")
+           downloadpath = dbresult.src_swift_docs_path_img
+           break;
+        default:
+          console.log("goes to undefined folder")
+      }
+
+      console.log("Attachment ==> ",filename)
+      console.log("Download Path ==> ", downloadpath)
+
       // Write the PDF data to a file
-      fs.writeFileSync(dbresult.src_swift_docs_path_pdf + "/" + uniquefile + " .pdf", response.data);
+      fs.writeFileSync(downloadpath + "/" + filename , response.data);
       PickHistory({ message: `File -${swift} downloaded`, function_name: 'DownloadConverters', date_started: systemDate,  event: "Download file",logtype:1 }, req)
-      res.download(dbresult.src_swift_docs_path_pdf + "/" + uniquefile + " .pdf")
+      res.download(downloadpath + "/" + filename)
     })
     .catch(error => {
       PickHistory({ message: `Failed to download file  -${swift}`, function_name: 'DownloadConverters', date_started: systemDate,  event: "Download file",logtype:0 }, req)
