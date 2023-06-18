@@ -222,7 +222,7 @@ exports.appauth = asynHandler(async (req, res, next) => {
   let key = req.headers['app-key'];
   let secret = req.headers['app-secret']
   //search for app in db
-  const foundApp = await AppAuthModel.auth(key)
+  const foundApp = await AppAuthModel.FindApp(key)
 
 
   let AppDbInfo = foundApp
