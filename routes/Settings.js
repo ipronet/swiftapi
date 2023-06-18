@@ -158,5 +158,5 @@ router.route("/fetchapps").post(GetApp);
 router.route("/updateapp").post(updateApp);
 
 //testcreate alert profile
-router.route("/testcreateprofile").post(appauth,CreateProfile);
+router.route("/external/testcreateprofile").post(appauth,AlertProfile,CreateProfile);
 module.exports = router;

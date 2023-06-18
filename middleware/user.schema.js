@@ -150,11 +150,18 @@ module.exports = {
     }
   },
   AlertProfile: async (req, res, next) => {
-    const value = await alertProfile.validate(req.body);
+    const options = {
+      errors: {
+        wrap: {
+          label: "",
+        },
+      },
+    };
+    const value = await alertProfile.validate(req.body,options);
     if (value.error) {
       res.status(400).json({
-        success: false,
-        message: value.error.details[0].message,
+        Status: 0,
+        Message: value.error.details[0].message,
       });
     } else {
       next();
