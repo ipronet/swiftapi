@@ -67,6 +67,13 @@ updateSystemSession
  Utility,
  UtilityReport
           } = require("../controllers/Dashboard/dashboard");
+  
+          //external app auth crud services
+          const {
+            CreateApp,
+            updateApp,
+            GetApp
+                     } = require("../controllers/Settings/appauth");
 
 //schema
 const {
@@ -83,7 +90,7 @@ const {
 } = require("../middleware/user.schema");
 
 // protect middleware
-const { protect, authorisRole,authToken, protectMsgDownloadAccess, protectMsgReadAccess, protectMsgConvertAccess } = require("../middleware/guard");
+const { protect, authorisRole,authToken, protectMsgDownloadAccess, protectMsgReadAccess, protectMsgConvertAccess, appauth } = require("../middleware/guard");
 const { updateldap } = require("../validation/swiftuser.schema");
 
 //routes
@@ -143,4 +150,13 @@ router.route("/updatesession").post(updateSystemSession);
 
 router.route("/utility").post(Utility);
 router.route("/utilityreport").post(UtilityReport);
+
+
+//app setup routes
+router.route("/createapp").post(CreateApp);
+router.route("/fetchapps").post(GetApp);
+router.route("/updateapp").post(updateApp);
+
+//testcreate alert profile
+router.route("/testcreateprofile").post(appauth,CreateProfile);
 module.exports = router;

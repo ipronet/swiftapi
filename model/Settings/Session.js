@@ -22,7 +22,8 @@ swiftdb.createSession = (postData = req.body) => {
       [postData],
       (err, results) => {
         if (err) {
-          throw err;
+          logger.error(err);
+          return reject(err);
         }
 
         return resolve(results);

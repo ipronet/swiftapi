@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const USERS = require("../model/User/UserModel");
+const bcrypt = require("bcrypt");
+const AppAuthModel = require("../model/Settings/AppAuth")
 const MESSAGE_PERMISSION = require("../model/Messages/Mpermission");
 const asynHandler = require("../middleware/async");
 const ErrorResponse = require("../utls/errorResponse");
@@ -214,4 +216,54 @@ exports.protectMsgDownloadAccess = asynHandler(async (req, res, next) => {
   } catch (err) {
     return next(new ErrorResponse("Not authorized to access this route.", 401));
   }
+});
+
+exports.appauth = asynHandler(async (req, res, next) => {
+  let key = req.headers['app-key'];
+  let secret = req.headers['app-secret']
+  //search for app in db
+  const foundApp = await AppAuthModel.auth(key)
+
+
+  let AppDbInfo = foundApp
+  if (!AppDbInfo) {
+    // CatchHistory({ pi_response: "Unauthorized access-app not in database", function_name: 'appauth', date_started: systemDate, sql_action: "SELECT", event: "App Authentication", actor: '' }, req)
+    return next(new ErrorResponse("Unauthorized access to api", 401));
+
+
+  }
+  //is app active ?
+  if (!AppDbInfo.app_status) {
+    // CatchHistory({ api_response: "Unauthorized access-app exist but not active", function_name: 'appauth', date_started: systemDate, sql_action: "SELECT", event: "App Authentication", actor: '' }, req)
+    return next(new ErrorResponse("Unauthorized access to api", 401));
+  }
+
+
+  //check for secret
+  const match = await bcrypt.compare(secret, AppDbInfo.app_secret)
+
+  if (!match) {
+    // CatchHistory({ api_response: "Unauthorized access-app exist but secret does not match", function_name: 'appauth', date_started: systemDate, sql_action: "SELECT", event: "App Authentication", actor: '' }, req)
+    return next(new ErrorResponse("Unauthorized access to api", 401));
+  }
+
+
+  if (!AppDbInfo.check_ip) {
+    req.RequestingAppInfo = AppDbInfo
+    return next()
+  }
+
+  //check if ip exist
+  var arrayOfallowedIps = !AppDbInfo?.allowed_ips ? "" : AppDbInfo?.allowed_ips.split(",");
+  var found = arrayOfallowedIps.includes(String('154.160.4.142'));
+
+  if (AppDbInfo.check_ip && !found) {
+    // CatchHistory({ api_response: "Unauthorized access-app exist but ip not in db", function_name: 'appauth', date_started: systemDate, sql_action: "SELECT", event: "App Authentication", actor: '' }, req)
+    return next(new ErrorResponse("Unauthorized access to api", 401));
+  }
+  if (AppDbInfo.check_ip && found) {
+    req.RequestingAppInfo = AppDbInfo
+    return next()
+  }
+
 });

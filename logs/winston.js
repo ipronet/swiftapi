@@ -33,7 +33,7 @@ const morganMiddleware = morgan(
     },
     {
       stream: {
-        // Configure Morgan to use collabo logger with the http severity
+        // Configure Morgan to use swift logger with the http severity
         write: (message) => {
           const data = JSON.parse(message);
           logger.http(`incoming-api-request`, data);
